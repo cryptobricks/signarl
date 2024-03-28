@@ -5,8 +5,8 @@ from datetime import datetime
 
 import requests
 
-WEBHOOK_URL = "https://open.larksuite.com/open-apis/bot/v2/hook/a0f1143e-0de1-4d42-9a27-b80bc6fb2833"
-WEBHOOK_SECRET = "OJK9W6jYxnxoLS9Dlm3VOh"
+WEBHOOK_URL = "https://open.larksuite.com/open-apis/bot/v2/hook/ad934e25-2ee5-4cfc-8ef4-2482361c3b95"
+WEBHOOK_SECRET = "L69pb5WOpFWFbyhD63CI0c"
 
 
 def gen_sign(secret):  # 拼接时间戳以及签名校验
