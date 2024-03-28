@@ -34,7 +34,7 @@ class GetSignarl(BaseJob):
 
     async def get_signarl_list(self):
         try:
-            url = "https://signarl.com/api/model/signal/list?pageNum=1&pageSize=5&modelId=model_44843740513537256"
+            url = "https://signarl.com/api/model/signal/list"
             response = requests.get(url=url)
             response = response.json()
             result_data = response.get("data")
@@ -47,13 +47,18 @@ class GetSignarl(BaseJob):
         try:
 
             result_list = await self.get_signarl_list()
-            for index, signarl in enumerate(result_list):
 
+            for index, signarl in enumerate(result_list):
                 generateTime = signarl.get("generateTime")
 
                 if generateTime in signarl_list:
                     continue
                 text = signarl.get("text")
+                symbol = signarl.get("symbol")
+                url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
+                price_result = requests.get(url=url).json()
+                price = price_result["price"]
+                text = text + "\n" + f"{symbol}价格：" + price
 
                 model_type_name = signarl.get("model_type_name")
 
