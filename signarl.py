@@ -57,17 +57,11 @@ class GetSignarl(BaseJob):
 
                 model_type_name = signarl.get("model_type_name")
 
-                if model_type_name == "强空" or model_type_name == "强多":
+                if (model_type_name == "强空" or model_type_name == "强多" or
+                        model_type_name == "超空" or model_type_name == "超多"):
                     signarl_list.append(generateTime)
-                    information = {
-                        "now": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                        "generateTime": datetime.fromtimestamp(generateTime / 1000).strftime("%Y-%m-%d %H:%M:%S"),
-                        "model_type_name": model_type_name,
-                        "text": text
-                    }
 
-                    information = json.dumps(information, ensure_ascii=False, indent=4)
-                    send_a_message(information)
+                    send_a_message(text)
 
         except Exception as e:
             loguru.logger.exception(traceback.format_exc())
