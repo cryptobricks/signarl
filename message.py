@@ -3,10 +3,13 @@ import hashlib
 import hmac
 from datetime import datetime
 
+import pytz
 import requests
 
-WEBHOOK_URL = "https://open.larksuite.com/open-apis/bot/v2/hook/ad934e25-2ee5-4cfc-8ef4-2482361c3b95"
-WEBHOOK_SECRET = "L69pb5WOpFWFbyhD63CI0c"
+# WEBHOOK_URL = "https://open.larksuite.com/open-apis/bot/v2/hook/ad934e25-2ee5-4cfc-8ef4-2482361c3b95"
+WEBHOOK_URL = "https://open.larksuite.com/open-apis/bot/v2/hook/a0f1143e-0de1-4d42-9a27-b80bc6fb2833"
+# WEBHOOK_SECRET = "L69pb5WOpFWFbyhD63CI0c"
+WEBHOOK_SECRET = "OJK9W6jYxnxoLS9Dlm3VOh"
 
 
 def gen_sign(secret):  # 拼接时间戳以及签名校验
@@ -26,8 +29,11 @@ def gen_sign(secret):  # 拼接时间戳以及签名校验
 
 def send_a_message(content):
     sign = gen_sign(WEBHOOK_SECRET)
-    timestamp = int(datetime.now().timestamp())
+    shanghai_timezone = pytz.timezone('Asia/Shanghai')
+    timestamp = int(datetime.now(shanghai_timezone).timestamp())
+
     time_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # 格式化时间字符串
+    print(time_str)
     params = {
         "timestamp": timestamp,
         "sign": sign,
