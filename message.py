@@ -32,8 +32,8 @@ def send_a_message(content):
     shanghai_timezone = pytz.timezone('Asia/Shanghai')
     timestamp = int(datetime.now(shanghai_timezone).timestamp())
 
-    time_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # 格式化时间字符串
-    print(time_str)
+    time_str = datetime.now(shanghai_timezone).strftime("%Y-%m-%d %H:%M:%S")  # 格式化时间字符串
+
     params = {
         "timestamp": timestamp,
         "sign": sign,
