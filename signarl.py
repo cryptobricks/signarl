@@ -56,7 +56,11 @@ class GetSignarl(BaseJob):
                 text = signarl.get("text")
                 symbol = signarl.get("symbol")
                 url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
-                price_result = requests.get(url=url).json()
+                proxies = {
+                    'http': 'http://158.178.225.38:38080',
+                    'https': 'http://158.178.225.38:38080',
+                }
+                price_result = requests.get(url=url, proxies=proxies).json()
                 price = price_result["price"]
                 text = text + "\n" + f"{symbol}价格：" + price
 
