@@ -67,9 +67,10 @@ class GetSignarl(BaseJob):
                 model_type_name = signarl.get("model_type_name")
 
                 if (model_type_name == "强空" or model_type_name == "强多" or
-                        model_type_name == "超空" or model_type_name == "超多"):
+                        model_type_name == "超空" or model_type_name == "超多" or
+                    model_type_name == "中空" or model_type_name == "中多"
+                ):
                     signarl_list.append(generateTime)
-
                     send_a_message(text)
 
         except Exception as e:
