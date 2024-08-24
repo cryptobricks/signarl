@@ -38,7 +38,7 @@ class GetSignarl(BaseJob):
         return {
             "trigger": "cron",
             "second": "0",  # 指定秒数为0
-            "minute": "*/1",  # 每15分钟触发一次
+            "minute": "*/5",  # 每15分钟触发一次
             "hour": "*",  # 任意小时
             "day": "*",  # 任意日期
             "month": "*",  # 任意月份
