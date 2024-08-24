@@ -1,4 +1,4 @@
-FROM python:3.9.18-bullseye
+FROM python:3.10
 WORKDIR /app
 ADD . .
 RUN pip install -r requirements.txt
