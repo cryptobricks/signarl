@@ -19,7 +19,7 @@ from message import send_a_message
 signarl_list = list()
 
 engine = create_async_engine(
-    "mysql+aiomysql://root:root@192.168.50.2:3306/test?charset=utf8mb4",
+    "mysql+aiomysql://cb:cryptoBricks123@cb-rds.cw5tnk9dgstt.us-west-2.rds.amazonaws.com:3306/da_test?charset=utf8mb4",
     pool_pre_ping=True,
     pool_recycle=180,
     pool_size=10,
