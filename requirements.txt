@@ -5,7 +5,8 @@ loguru==0.7.2
 pandas==2.0.3
 peewee==3.16.3
 pymysql
-numpy
+numpy==1.26.4
+pandas==2.0.3
 pydantic==1.10.13
 # pydantic_settings==2.0.3
 pytz==2023.3
