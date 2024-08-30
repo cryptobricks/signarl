@@ -1,4 +1,6 @@
 import asyncio
+import hashlib
+import json
 import traceback
 from datetime import datetime
 
@@ -61,6 +63,7 @@ class GetSignarl(BaseJob):
                     result_list = result_data.get("list")
 
                     if result_list:
+
                         async with async_session() as session:
                             async with session.begin():
                                 query = select(t_signal_table.c.signal_id)
@@ -76,6 +79,51 @@ class GetSignarl(BaseJob):
                         if filtered_result_list:
                             extracted_records = [record for record in result_list if record['id'] in filtered_result_list]
                             for item in extracted_records:
+                                detail = json.loads(item['detail'])
+                                if detail:
+                                    open_price = detail['checked'].get('close')
+                                else:
+                                    open_price = ""
+
+                                body = {
+                                    "data": [
+                                        {
+                                            "symbol": item['symbol'],
+                                            "model_name": item['model_name'],
+                                            "model_type_name": item["model_type_name"],
+                                            "create_time": item['generateTime'],
+                                            "open_price": open_price,
+                                            "deep_low": item['scoreDetail'].get("min_depth"),
+                                            "deep_high": item['scoreDetail'].get("max_depth"),
+                                            "period_low": item['scoreDetail'].get("min_time"),
+                                            "period_high": item['scoreDetail'].get("max_time")
+                                        }
+                                    ]
+                                }
+
+                                body_json = json.dumps(body)
+                                body_requests = body_json+str(timestamp)+'n9jl2OU8SvHzRKrbGa10xtCM3Qc6V7gA'
+
+                                input_bytes = body_requests.encode('utf-8')
+                                md5 = hashlib.md5()
+                                md5.update(input_bytes)
+                                md5_digest = md5.hexdigest()
+
+                                header = {
+                                    "push-timestamp": str(timestamp),
+                                    "push-sign": md5_digest
+                                }
+
+                                url = 'http://test2.admin.martingrid.com/sapiv2/pushAiSignal'
+                                async with aiohttp.ClientSession() as session:
+                                    async with session.post(url, headers=header, data=body_json, ssl=False) as response:
+                                        response_json = await response.text()
+                                        response_json = json.loads(response_json)
+                                        if response_json == 200:
+                                            loguru.logger.info(response_json)
+                                        else:
+                                            loguru.logger.error(response_json)
+
                                 information = {
                                     "signal_id": item.get("id"),
                                     "modelId": item.get("modelId"),
@@ -149,7 +197,7 @@ signarl = GetSignarl()
 
 async def main():
     signarl = GetSignarl()
-    result = await signarl.get_signarl()
+    result = await signarl.get_signarl_list()
 
 
 if __name__ == "__main__":
