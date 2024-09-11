@@ -179,6 +179,8 @@ class GetSignarl(BaseJob):
                             else:
                                 loguru.logger.error(response_json)
         except Exception as e:
+            send_error_a_message(traceback.format_exc())
+            send_error_a_message(e)
             loguru.logger.info(e)
             loguru.logger.error(traceback.format_exc())
 
@@ -221,6 +223,7 @@ class GetSignarl(BaseJob):
         except Exception as e:
             loguru.logger.exception(traceback.format_exc())
             send_error_a_message(e)
+            send_error_a_message(traceback.format_exc())
 
     async def do_job(self):
         loguru.logger.info("---->{signarl} start")
