@@ -35,7 +35,7 @@ async_session = sessionmaker(
 # 测试环境Redis
 # REDIS_URL = "redis://10.244.4.140:6379"
 # 生产环境redis
-REDIS_URL = "redis://10.244.4.58:6379"
+REDIS_URL = "redis://10.244.4.58:6379/15"
 # 本地环境Redis
 # REDIS_URL = "redis://127.0.0.1:6379/15"
 pool = aioredis.ConnectionPool.from_url(REDIS_URL, max_connections=100000)
