@@ -5,6 +5,7 @@ import traceback
 from datetime import datetime
 
 import aiohttp
+import aioredis
 import pytz
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
@@ -31,6 +32,15 @@ async_session = sessionmaker(
     engine, expire_on_commit=False, class_=AsyncSession
 )
 
+# 测试环境Redis
+# REDIS_URL = "redis://10.244.4.140:6379"
+# 生产环境redis
+REDIS_URL = "redis://10.244.4.58:6379"
+# 本地环境Redis
+# REDIS_URL = "redis://127.0.0.1:6379/15"
+pool = aioredis.ConnectionPool.from_url(REDIS_URL, max_connections=100000)
+redis_client = aioredis.Redis(connection_pool=pool)
+
 
 async def signal_entry_table(extracted_records):
     try:
@@ -40,6 +50,9 @@ async def signal_entry_table(extracted_records):
 
         if extracted_records:
             for item in extracted_records:
+                signal_id = item["id"]
+                await redis_client.set(signal_id, str(item))
+
                 information = {
                     "signal_id": item.get("id"),
                     "modelId": item.get("modelId"),
@@ -184,6 +197,57 @@ class GetSignarl(BaseJob):
             loguru.logger.info(e)
             loguru.logger.error(traceback.format_exc())
 
+    async def sending_a_signal_to_tribe(self, extracted_records):
+        try:
+            utc_time = datetime.utcnow().replace(tzinfo=pytz.utc)
+            formatted_time = utc_time.strftime('%Y-%m-%d %H:%M:%S')
+            timestamp = int(utc_time.timestamp() * 1000)
+
+            if extracted_records:
+                for item in extracted_records:
+                    detail = json.loads(item['detail'])
+                    if detail:
+                        open_price = detail['checked'].get('close')
+                    else:
+                        open_price = ""
+
+                    body = {
+                        "data": [
+                            {
+                                "symbol": item['symbol'],
+                                "model_name": item['model_name'],
+                                "model_type_name": item["model_type_name"],
+                                "create_time": item['generateTime'],
+                                "open_price": open_price,
+                                "deep_low": item['scoreDetail'].get("min_depth"),
+                                "deep_high": item['scoreDetail'].get("max_depth"),
+                                "period_low": item['scoreDetail'].get("min_time"),
+                                "period_high": item['scoreDetail'].get("max_time")
+                            }
+                        ]
+                    }
+
+                    body_json = json.dumps(body)
+
+                    headers = {
+                        'Content-Type': 'application/json'
+                    }
+
+                    url = 'https://uadcwf9ooa.execute-api.ap-southeast-2.amazonaws.com/Dev/btc-post-resource'
+                    async with aiohttp.ClientSession() as session:
+                        async with session.post(url, headers=headers, data=body_json, ssl=False) as response:
+                            response_json = await response.text()
+                            response_json = json.loads(response_json)
+                            if response_json == 200:
+                                loguru.logger.info(response_json)
+                            else:
+                                loguru.logger.error(response_json)
+        except Exception as e:
+            send_error_a_message(traceback.format_exc())
+            send_error_a_message(e)
+            loguru.logger.info(e)
+            loguru.logger.error(traceback.format_exc())
+
     async def get_signarl(self):
         try:
 
@@ -193,32 +257,47 @@ class GetSignarl(BaseJob):
             await signal_entry_table(old_signal)
 
             if old_signal:
-                await self.sending_a_signal(old_signal)
+                try:
+                    await self.sending_a_signal(old_signal)
+                except Exception as e:
+                    print(f"Error sending a signal: {e}")
+
+                try:
+                    await self.sending_a_signal_to_tribe(old_signal)
+                except Exception as e:
+                    print(f"Error sending a signal to tribe: {e}")
 
             for index, signarl in enumerate(result_list):
-                generateTime = signarl.get("generateTime")
+                signal_id = signarl.get('id')
 
-                if generateTime in signarl_list:
-                    continue
-                text = signarl.get("text")
-                symbol = signarl.get("symbol")
-                url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
-                proxies = {
-                    'http': 'http://158.178.225.38:38080',
-                    'https': 'http://158.178.225.38:38080',
-                }
-                price_result = requests.get(url=url, proxies=proxies).json()
-                price = price_result["price"]
-                text = text + "\n" + f"{symbol}价格：" + price
+                value = await redis_client.get(signal_id)
+                await redis_client.close()
 
-                model_type_name = signarl.get("model_type_name")
+                if value:
+                    break
+                else:
+                    generateTime = signarl.get("generateTime")
 
-                if (model_type_name == "强空" or model_type_name == "强多" or
-                        model_type_name == "超空" or model_type_name == "超多" or
-                        model_type_name == "中空" or model_type_name == "中多"
-                ):
-                    signarl_list.append(generateTime)
-                    send_a_message(text)
+                    text = signarl.get("text")
+                    symbol = signarl.get("symbol")
+                    url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
+                    proxies = {
+                        'http': 'http://158.178.225.38:38080',
+                        'https': 'http://158.178.225.38:38080',
+                    }
+                    price_result = requests.get(url=url, proxies=proxies).json()
+                    price = price_result["price"]
+                    text = text + "\n" + f"{symbol}价格：" + price
+
+                    model_type_name = signarl.get("model_type_name")
+
+                    if (model_type_name == "强空" or model_type_name == "强多" or
+                            model_type_name == "超空" or model_type_name == "超多" or
+                            model_type_name == "中空" or model_type_name == "中多"
+                    ):
+                        signarl_list.append(generateTime)
+                        send_a_message(text)
+
 
         except Exception as e:
             loguru.logger.exception(traceback.format_exc())

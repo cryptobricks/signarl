@@ -6,10 +6,12 @@ from datetime import datetime
 import pytz
 import requests
 
+# 正式环境
 WEBHOOK_URL = "https://open.larksuite.com/open-apis/bot/v2/hook/b4164b01-2d4a-461d-90dc-d54a2f843c24"
-# WEBHOOK_URL = "https://open.larksuite.com/open-apis/bot/v2/hook/a0f1143e-0de1-4d42-9a27-b80bc6fb2833"
 WEBHOOK_SECRET = "pbEQbitncvDQ7npSOpwtDc"
-# WEBHOOK_SECRET = "OJK9W6jYxnxoLS9Dlm3VOh"
+# 测试环境
+# WEBHOOK_URL = "https://open.larksuite.com/open-apis/bot/v2/hook/4369cd93-e94b-4d00-9c20-bfb0924d7b0e"
+# WEBHOOK_SECRET = "C6Iq5S66oiXh5Iuo6rUCzd"
 
 
 def gen_sign(secret):  # 拼接时间戳以及签名校验
