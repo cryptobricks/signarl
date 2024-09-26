@@ -21,3 +21,4 @@ databases==0.8.0
 greenlet
 aioredis==2.0.1
 redis
+requests[socks]
