@@ -150,7 +150,7 @@ class GetSignarl(BaseJob):
             timestamp = int(utc_time.timestamp() * 1000)
 
             if extracted_records:
-                detail = extracted_records["detail"]
+                detail = json.loads(extracted_records["detail"])
                 if detail:
                     open_price = detail["checked"].get("close")
                 else:
