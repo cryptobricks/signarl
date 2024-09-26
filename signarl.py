@@ -150,52 +150,50 @@ class GetSignarl(BaseJob):
             timestamp = int(utc_time.timestamp() * 1000)
 
             if extracted_records:
-                for item in extracted_records:
-                    detail = json.loads(item["detail"])
-                    if detail:
-                        open_price = detail["checked"].get("close")
-                    else:
-                        open_price = ""
+                detail = extracted_records["detail"]
+                if detail:
+                    open_price = detail["checked"].get("close")
+                else:
+                    open_price = ""
 
-                    body = {
-                        "data": [
-                            {
-                                "symbol": item["symbol"],
-                                "model_name": item["model_name"],
-                                "model_type_name": item["model_type_name"],
-                                "create_time": item["generateTime"],
-                                "open_price": open_price,
-                                "deep_low": item["scoreDetail"].get("min_depth"),
-                                "deep_high": item["scoreDetail"].get("max_depth"),
-                                "period_low": item["scoreDetail"].get("min_time"),
-                                "period_high": item["scoreDetail"].get("max_time"),
-                            }
-                        ]
-                    }
+                body = {
+                    "data": [
+                        {
+                            "symbol": extracted_records["symbol"],
+                            "model_name": extracted_records["model_name"],
+                            "model_type_name": extracted_records["model_type_name"],
+                            "create_time": extracted_records["generateTime"],
+                            "open_price": open_price,
+                            "deep_low": extracted_records["scoreDetail"].get("min_depth"),
+                            "deep_high": extracted_records["scoreDetail"].get("max_depth"),
+                            "period_low": extracted_records["scoreDetail"].get("min_time"),
+                            "period_high": extracted_records["scoreDetail"].get("max_time"),
+                        }
+                    ]
+                }
 
-                    body_json = json.dumps(body)
-                    body_requests = (
-                            body_json + str(timestamp) + "n9jl2OU8SvHzRKrbGa10xtCM3Qc6V7gA"
-                    )
+                body_json = json.dumps(body)
+                body_requests = (
+                        body_json + str(timestamp) + "n9jl2OU8SvHzRKrbGa10xtCM3Qc6V7gA"
+                )
 
-                    input_bytes = body_requests.encode("utf-8")
-                    md5 = hashlib.md5()
-                    md5.update(input_bytes)
-                    md5_digest = md5.hexdigest()
+                input_bytes = body_requests.encode("utf-8")
+                md5 = hashlib.md5()
+                md5.update(input_bytes)
+                md5_digest = md5.hexdigest()
 
-                    header = {"push-timestamp": str(timestamp), "push-sign": md5_digest}
-
-                    url = "http://test2.admin.martingrid.com/sapiv2/pushAiSignal"
-                    async with aiohttp.ClientSession() as session:
-                        async with session.post(
-                                url, headers=header, data=body_json, ssl=False
-                        ) as response:
-                            response_json = await response.text()
-                            response_json = json.loads(response_json)
-                            if response_json == 200:
-                                loguru.logger.info(response_json)
-                            else:
-                                loguru.logger.error(response_json)
+                header = {"push-timestamp": str(timestamp), "push-sign": md5_digest}
+                url = "http://test2.admin.martingrid.com/sapiv2/pushAiSignal"
+                async with aiohttp.ClientSession() as session:
+                    async with session.post(
+                            url, headers=header, data=body_json, ssl=False
+                    ) as response:
+                        response_json = await response.text()
+                        response_json = json.loads(response_json)
+                        if response_json == 200:
+                            loguru.logger.info(response_json)
+                        else:
+                            loguru.logger.error(response_json)
         except Exception as e:
             send_error_a_message(traceback.format_exc())
             send_error_a_message(e)
@@ -209,44 +207,44 @@ class GetSignarl(BaseJob):
             timestamp = int(utc_time.timestamp() * 1000)
 
             if extracted_records:
-                for item in extracted_records:
-                    detail = json.loads(item["detail"])
-                    if detail:
-                        open_price = detail["checked"].get("close")
-                    else:
-                        open_price = ""
+                detail = json.loads(extracted_records["detail"])
 
-                    body = {
-                        "data": [
-                            {
-                                "symbol": item["symbol"],
-                                "model_name": item["model_name"],
-                                "model_type_name": item["model_type_name"],
-                                "create_time": item["generateTime"],
-                                "open_price": open_price,
-                                "deep_low": item["scoreDetail"].get("min_depth"),
-                                "deep_high": item["scoreDetail"].get("max_depth"),
-                                "period_low": item["scoreDetail"].get("min_time"),
-                                "period_high": item["scoreDetail"].get("max_time"),
-                            }
-                        ]
-                    }
+                if detail:
+                    open_price = detail["checked"].get("close")
+                else:
+                    open_price = ""
 
-                    body_json = json.dumps(body)
+                body = {
+                    "data": [
+                        {
+                            "symbol": extracted_records["symbol"],
+                            "model_name": extracted_records["model_name"],
+                            "model_type_name": extracted_records["model_type_name"],
+                            "create_time": extracted_records["generateTime"],
+                            "open_price": open_price,
+                            "deep_low": extracted_records["scoreDetail"].get("min_depth"),
+                            "deep_high": extracted_records["scoreDetail"].get("max_depth"),
+                            "period_low": extracted_records["scoreDetail"].get("min_time"),
+                            "period_high": extracted_records["scoreDetail"].get("max_time"),
+                        }
+                    ]
+                }
 
-                    headers = {"Content-Type": "application/json"}
+                body_json = json.dumps(body)
 
-                    url = "https://uadcwf9ooa.execute-api.ap-southeast-2.amazonaws.com/Dev/btc-post-resource"
-                    async with aiohttp.ClientSession() as session:
-                        async with session.post(
-                                url, headers=headers, data=body_json, ssl=False
-                        ) as response:
-                            response_json = await response.text()
-                            response_json = json.loads(response_json)
-                            if response_json == 200:
-                                loguru.logger.info(response_json)
-                            else:
-                                loguru.logger.error(response_json)
+                headers = {"Content-Type": "application/json"}
+
+                url = "https://uadcwf9ooa.execute-api.ap-southeast-2.amazonaws.com/Dev/btc-post-resource"
+                async with aiohttp.ClientSession() as session:
+                    async with session.post(
+                            url, headers=headers, data=body_json, ssl=False
+                    ) as response:
+                        response_json = await response.text()
+                        response_json = json.loads(response_json)
+                        if response_json == 200:
+                            loguru.logger.info(response_json)
+                        else:
+                            loguru.logger.error(response_json)
         except Exception as e:
             send_error_a_message(traceback.format_exc())
             send_error_a_message(e)
@@ -262,7 +260,6 @@ class GetSignarl(BaseJob):
                 signal_id = signarl.get("id")
                 if signal_id:
                     value = redis_client.get(signal_id)
-                    loguru.logger.info(value)
                 if value:
                     break
                 else:
@@ -280,13 +277,21 @@ class GetSignarl(BaseJob):
 
                     text = signarl.get("text")
                     symbol = signarl.get("symbol")
+                    price = ""
                     url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
                     proxies = {
                         "http": "http://158.178.225.38:38080",
                         "https": "http://158.178.225.38:38080",
                     }
-                    price_result = requests.get(url=url, proxies=proxies).json()
-                    price = price_result["price"]
+                    try:
+                        price_result = requests.get(url=url, proxies=proxies, timeout=20).json()
+                        price = price_result["price"]
+                    except Exception as e:
+                        loguru.logger.error(e)
+                        loguru.logger.error(traceback.format_exc())
+                        send_error_a_message(e)
+                        send_error_a_message(traceback.format_exc())
+
                     text = text + "\n" + f"{symbol}价格：" + price
 
                     model_type_name = signarl.get("model_type_name")
