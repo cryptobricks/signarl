@@ -280,8 +280,8 @@ class GetSignarl(BaseJob):
                     price = ""
                     url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
                     proxies = {
-                        'http': 'socks5h://8.218.150.157:10808',
-                        'https': 'socks5h://8.218.150.157:10808'
+                        'http': 'http://205.198.65.182:38080',
+                        'https': 'http://205.198.65.182:38080'
                     }
                     try:
                         price_result = requests.get(url=url, proxies=proxies, timeout=20).json()
