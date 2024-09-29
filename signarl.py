@@ -284,7 +284,7 @@ class GetSignarl(BaseJob):
                         'https': 'http://205.198.65.182:38080'
                     }
                     try:
-                        price_result = requests.get(url=url, proxies=proxies, timeout=20).json()
+                        price_result = requests.get(url=url, proxies=proxies, timeout=40).json()
                         price = price_result["price"]
                     except Exception as e:
                         loguru.logger.error(e)
