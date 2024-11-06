@@ -292,7 +292,7 @@ class GetSignarl(BaseJob):
                         send_error_a_message(e)
                         send_error_a_message(traceback.format_exc())
 
-                    text = text + "\n" + f"{symbol}价格：" + price
+                    text = f"signal_id:{signal_id}" + "\n" + text + "\n" + f"{symbol}价格：" + price
 
                     model_type_name = signarl.get("model_type_name")
 
